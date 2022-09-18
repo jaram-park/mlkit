@@ -43,6 +43,7 @@ class PoseGraphic internal constructor(
   private val leftPaint: Paint
   private val rightPaint: Paint
   private val whitePaint: Paint
+  private val anglePaint: Paint
 
   init {
     classificationTextPaint = Paint()
@@ -60,6 +61,10 @@ class PoseGraphic internal constructor(
     rightPaint = Paint()
     rightPaint.strokeWidth = STROKE_WIDTH
     rightPaint.color = Color.YELLOW
+    anglePaint = Paint()
+    anglePaint.color = Color.RED
+    anglePaint.textSize = POSE_ANGLE_TEXT_SIZE
+    anglePaint.strokeWidth = STROKE_WIDTH
   }
 
   override fun draw(canvas: Canvas) {
@@ -178,6 +183,31 @@ class PoseGraphic internal constructor(
         )
       }
     }
+    // squat
+
+    if (leftIndex != null && leftElbow != null && leftShoulder != null &&
+      leftHeel != null && leftKnee != null && leftHip != null){
+
+//      var squatJoints = arrayListOf<Joint>(Joint(leftIndex, leftElbow, leftShoulder),
+//        Joint(leftHeel, leftKnee, leftHip),
+//        Joint(leftShoulder, leftHip, leftKnee))
+
+      var squatJoints = arrayListOf<Joint>(Joint(leftHeel, leftKnee, leftHip,
+      90, 135, "무릎"))
+
+      for (joint in squatJoints){
+        //var angle = joint.getAngle()
+        var feedback = joint.getFeedback()
+        canvas.drawText(
+          //String.format(Locale.US, "%.2f", angle),
+          feedback,
+          translateX(joint.midPoint.position.x),
+          translateY(joint.midPoint.position.y),
+          anglePaint
+        )
+      }
+
+    }
   }
 
   internal fun drawPoint(canvas: Canvas, landmark: PoseLandmark, paint: Paint) {
@@ -252,10 +282,10 @@ class PoseGraphic internal constructor(
   }
 
   companion object {
-
     private val DOT_RADIUS = 8.0f
     private val IN_FRAME_LIKELIHOOD_TEXT_SIZE = 30.0f
     private val STROKE_WIDTH = 10.0f
     private val POSE_CLASSIFICATION_TEXT_SIZE = 60.0f
+    private val POSE_ANGLE_TEXT_SIZE = 100.0f
   }
 }
