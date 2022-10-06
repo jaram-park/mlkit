@@ -44,6 +44,7 @@ class PoseGraphic internal constructor(
   private val rightPaint: Paint
   private val whitePaint: Paint
   private val anglePaint: Paint
+  private val countPaint: Paint
 
   init {
     classificationTextPaint = Paint()
@@ -61,10 +62,16 @@ class PoseGraphic internal constructor(
     rightPaint = Paint()
     rightPaint.strokeWidth = STROKE_WIDTH
     rightPaint.color = Color.YELLOW
+
     anglePaint = Paint()
     anglePaint.color = Color.RED
     anglePaint.textSize = POSE_ANGLE_TEXT_SIZE
     anglePaint.strokeWidth = STROKE_WIDTH
+    countPaint = Paint()
+    countPaint.color = Color.BLUE
+    countPaint.textSize = POSE_ANGLE_TEXT_SIZE
+    countPaint.strokeWidth = STROKE_WIDTH
+
   }
 
   override fun draw(canvas: Canvas) {
@@ -183,27 +190,67 @@ class PoseGraphic internal constructor(
         )
       }
     }
+
+
+
     // squat
 
-    if (leftIndex != null && leftElbow != null && leftShoulder != null &&
-      leftHeel != null && leftKnee != null && leftHip != null){
+//    if (leftIndex != null && leftElbow != null && leftShoulder != null &&
+//      leftHeel != null && leftKnee != null && leftHip != null){
+//
+////      var squatJoints = arrayListOf<Joint>(Joint(leftIndex, leftElbow, leftShoulder),
+////        Joint(leftHeel, leftKnee, leftHip),
+////        Joint(leftShoulder, leftHip, leftKnee))
+//
+//      var squatJoints = arrayListOf<Joint>(Joint(leftHeel, leftKnee, leftHip,
+//      90, 135, "무릎"))
+//
+//      for (joint in squatJoints){
+//        //var angle = joint.getAngle()
+//        var feedback = joint.getFeedback()
+//
+//        canvas.drawText(
+//          //String.format(Locale.US, "%.2f", angle),
+//          feedback,
+//          translateX(joint.midPoint.position.x),
+//          translateY(joint.midPoint.position.y),
+//          anglePaint
+//        )
+//      }
+//
+//    }
 
-//      var squatJoints = arrayListOf<Joint>(Joint(leftIndex, leftElbow, leftShoulder),
-//        Joint(leftHeel, leftKnee, leftHip),
-//        Joint(leftShoulder, leftHip, leftKnee))
+    if (leftHip != null && leftKnee != null && leftAnkle != null){
 
-      var squatJoints = arrayListOf<Joint>(Joint(leftHeel, leftKnee, leftHip,
-      90, 135, "무릎"))
+      var doubleKneeJoints = arrayListOf<Joint>(Joint(leftHip, leftKnee, leftAnkle,
+        160, 180, 100, 120,
+        "무릎"))
 
-      for (joint in squatJoints){
+      for (joint in doubleKneeJoints){
         //var angle = joint.getAngle()
-        var feedback = joint.getFeedback()
+        var (feedback, actionStatus) = joint.getFeedback()
+
+        if (!targetPostureStatus && (actionStatus == "target_posture")){
+          targetPostureStatus = true
+        }else if (targetPostureStatus && (actionStatus == "basic_posture")) {
+          exerciseCount++
+          targetPostureStatus = false
+        }else{
+          exerciseCount += 0
+        }
+
         canvas.drawText(
-          //String.format(Locale.US, "%.2f", angle),
           feedback,
           translateX(joint.midPoint.position.x),
           translateY(joint.midPoint.position.y),
           anglePaint
+        )
+
+        canvas.drawText(
+          exerciseCount.toString(),
+          translateX(leftKnee.position.x),
+          translateY(leftKnee.position.y - 100),
+          countPaint
         )
       }
 
@@ -287,5 +334,8 @@ class PoseGraphic internal constructor(
     private val STROKE_WIDTH = 10.0f
     private val POSE_CLASSIFICATION_TEXT_SIZE = 60.0f
     private val POSE_ANGLE_TEXT_SIZE = 100.0f
+    var targetPostureStatus = false
+    var exerciseCount = 0
+
   }
 }
