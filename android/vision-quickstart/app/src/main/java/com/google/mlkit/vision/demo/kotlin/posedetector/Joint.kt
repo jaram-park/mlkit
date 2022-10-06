@@ -4,22 +4,34 @@ import com.google.mlkit.vision.pose.PoseLandmark
 import kotlin.math.atan2
 
 class Joint (var firstPoint: PoseLandmark, var midPoint: PoseLandmark, var lastPoint: PoseLandmark,
-            var minAngleRange: Int, var maxAngleRange: Int, var poseMidPoint: String){
+            var targetMinAngleRange: Int, var targetMaxAngleRange: Int,
+             var basicMinAngleRange: Int, var basicMaxAngleRange: Int, var poseMidPoint: String){
 
-    fun getFeedback(): String{
+
+    fun getFeedback(): Pair<String, String>{
         var currentAngle = getAngle()
         var poseFeedback: String
-        var poseStatus = if (currentAngle > maxAngleRange){
-            "조금만 더 내려요! "
-        }else if (currentAngle >= minAngleRange && currentAngle >= maxAngleRange){
-            "적절한 각도 입니다. \n 3초 정도 유지해주세요. 1, 2, 3"
-        }else if (currentAngle < minAngleRange){
-            "무리가요."
+
+        var actionStatus = if (currentAngle >= targetMinAngleRange && currentAngle <= targetMaxAngleRange){
+            "target_posture"
+        }else if (currentAngle >=basicMinAngleRange && currentAngle <=basicMaxAngleRange){
+            "basic_posture"
+        }else {
+            "in_doing"
+        }
+
+
+        var poseStatus = if (currentAngle > targetMaxAngleRange){
+            "조금 더 아래로! "
+        }else if (currentAngle >= targetMinAngleRange && currentAngle <= targetMaxAngleRange){
+            "지금 좋습니다. \n"
+        }else if (currentAngle < targetMinAngleRange){
+            "조금 더 위로!"
         }else{
             "좋습니다!"
         }
-        poseFeedback = "$poseMidPoint\n $poseStatus"
-        return poseFeedback
+        poseFeedback = "$currentAngle $poseMidPoint\n $poseStatus"
+        return Pair(poseFeedback, actionStatus)
     }
 
 
