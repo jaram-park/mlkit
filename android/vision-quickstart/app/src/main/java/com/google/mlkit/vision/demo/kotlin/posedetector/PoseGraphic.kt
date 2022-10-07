@@ -19,6 +19,8 @@ package com.google.mlkit.vision.demo.kotlin.posedetector
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Paint.Join
+import android.util.Log
 import com.google.common.primitives.Ints
 import com.google.mlkit.vision.demo.GraphicOverlay
 import com.google.mlkit.vision.demo.GraphicOverlay.Graphic
@@ -27,6 +29,11 @@ import com.google.mlkit.vision.pose.PoseLandmark
 import java.lang.Math.max
 import java.lang.Math.min
 import java.util.Locale
+import java.io.OutputStream
+import java.io.FileOutputStream
+
+
+val logList = mutableListOf<Joint>()
 
 /** Draw the detected pose in preview.  */
 class PoseGraphic internal constructor(
@@ -220,14 +227,22 @@ class PoseGraphic internal constructor(
 //
 //    }
 
-    if (leftHip != null && leftKnee != null && leftAnkle != null){
+
+
+
+    if (leftHip != null && leftKnee != null && leftAnkle != null &&
+            nose != null && leftShoulder!=null){
 
       var doubleKneeJoints = arrayListOf<Joint>(Joint(leftHip, leftKnee, leftAnkle,
         160, 180, 100, 120,
         "무릎"))
+      var backJoint = Joint(nose, leftShoulder, leftHip, 0, 0,
+        0, 0,"힙")
+
+      logList.add(backJoint)
+      FileOutputStream("back_position_angle_log.csv").apply{writeCsv(logList)}
 
       for (joint in doubleKneeJoints){
-        //var angle = joint.getAngle()
         var (feedback, actionStatus) = joint.getFeedback()
 
         if (!targetPostureStatus && (actionStatus == "target_posture")){
@@ -256,6 +271,8 @@ class PoseGraphic internal constructor(
 
     }
   }
+
+
 
   internal fun drawPoint(canvas: Canvas, landmark: PoseLandmark, paint: Paint) {
     val point = landmark.position3D
@@ -327,6 +344,23 @@ class PoseGraphic internal constructor(
       paint.setARGB(255, 255 - v, 255 - v, 255)
     }
   }
+
+  fun OutputStream.writeCsv(logList:List<Joint>) {
+    val writer = bufferedWriter()
+    writer.write(""""backFirstpointX", "backFirstpointX", "backFirstpointX",
+      |"backMidpointX", "backMidpointY", "backLastpointX", "backLastpointY", "backAngle"""")
+    writer.newLine()
+    logList.forEach {
+      writer.write("${it.firstPoint.position.x}, ${it.firstPoint.position.y}, "+
+              "${it.midPoint.position.x}, ${it.midPoint.position.y}, "+
+              "${it.lastPoint.position.x}, ${it.lastPoint.position.y}, ${it.getAngle()}")
+      writer.newLine()
+    }
+    writer.flush()
+  }
+
+
+
 
   companion object {
     private val DOT_RADIUS = 8.0f
