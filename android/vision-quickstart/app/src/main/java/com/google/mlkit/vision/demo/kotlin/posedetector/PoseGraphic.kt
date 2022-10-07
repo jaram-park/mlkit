@@ -33,7 +33,7 @@ import java.io.OutputStream
 import java.io.FileOutputStream
 
 
-val logList = mutableListOf<Joint>()
+val logList = mutableListOf<String>()
 
 /** Draw the detected pose in preview.  */
 class PoseGraphic internal constructor(
@@ -238,8 +238,14 @@ class PoseGraphic internal constructor(
         "무릎"))
       var backJoint = Joint(nose, leftShoulder, leftHip, 0, 0,
         0, 0,"힙")
+      var backJointAngle = backJoint.getAngle().toString()
 
-      logList.add(backJoint)
+      var jointLog = "${backJoint.firstPoint.position.x},${backJoint.firstPoint.position.y},"+
+              "${backJoint.midPoint.position.x},${backJoint.midPoint.position.y},"+
+              "${backJoint.lastPoint.position.x},${backJoint.lastPoint.position.y},$backJointAngle"
+
+      logList.add(jointLog)
+      Log.e("jointLog", jointLog)
 
       for (joint in doubleKneeJoints){
         var (feedback, actionStatus) = joint.getFeedback()
@@ -270,7 +276,6 @@ class PoseGraphic internal constructor(
 
     }
 
-    //FileOutputStream("back_position_angle_log.csv").apply{writeCsv(logList)}
 
   }
 
@@ -346,23 +351,6 @@ class PoseGraphic internal constructor(
       paint.setARGB(255, 255 - v, 255 - v, 255)
     }
   }
-
-  fun OutputStream.writeCsv(logList:List<Joint>) {
-    val writer = bufferedWriter()
-    writer.write(""""backFirstpointX", "backFirstpointY",
-      |"backMidpointX", "backMidpointY", "backLastpointX", "backLastpointY", "backAngle"""")
-    writer.newLine()
-    logList.forEach {
-      writer.write("${it.firstPoint.position.x}, ${it.firstPoint.position.y}, "+
-              "${it.midPoint.position.x}, ${it.midPoint.position.y}, "+
-              "${it.lastPoint.position.x}, ${it.lastPoint.position.y}, ${it.getAngle()}")
-      writer.newLine()
-    }
-    writer.flush()
-  }
-
-
-
 
   companion object {
     private val DOT_RADIUS = 8.0f
