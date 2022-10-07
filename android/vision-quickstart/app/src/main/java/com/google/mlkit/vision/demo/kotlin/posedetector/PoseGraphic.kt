@@ -240,7 +240,6 @@ class PoseGraphic internal constructor(
         0, 0,"힙")
 
       logList.add(backJoint)
-      FileOutputStream("back_position_angle_log.csv").apply{writeCsv(logList)}
 
       for (joint in doubleKneeJoints){
         var (feedback, actionStatus) = joint.getFeedback()
@@ -270,6 +269,9 @@ class PoseGraphic internal constructor(
       }
 
     }
+
+    //FileOutputStream("back_position_angle_log.csv").apply{writeCsv(logList)}
+
   }
 
 
@@ -347,7 +349,7 @@ class PoseGraphic internal constructor(
 
   fun OutputStream.writeCsv(logList:List<Joint>) {
     val writer = bufferedWriter()
-    writer.write(""""backFirstpointX", "backFirstpointX", "backFirstpointX",
+    writer.write(""""backFirstpointX", "backFirstpointY",
       |"backMidpointX", "backMidpointY", "backLastpointX", "backLastpointY", "backAngle"""")
     writer.newLine()
     logList.forEach {
